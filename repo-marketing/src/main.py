@@ -1,5 +1,3 @@
-# url: https://asia-northeast3-refined-asset-427901-s7.cloudfunctions.net/update_repo_marketing
-# 트리거 유형 https
 import functions_framework
 import pandas_gbq as gbq
 from google.oauth2 import service_account
