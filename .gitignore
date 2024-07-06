@@ -4,3 +4,4 @@ data/*
 configs/*
 .env
 __pycache__/*
+*.pyc
