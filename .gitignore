@@ -1,3 +1,6 @@
 .DS_Store
 .idea/*
 data/*
+configs/*
+.env
+__pycache__/*
