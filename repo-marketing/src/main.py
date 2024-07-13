@@ -4,6 +4,8 @@ from google.cloud import bigquery
 from query_strings import func_delete_records_from_bigquery, func_fetch_repo_events
 import requests
 import json
+from datetime import datetime
+import pytz
 
 def _load_df_from_bigquery(client, query):
     query_job = client.query(query)
@@ -70,7 +72,9 @@ def HelloHTTP(request):
     client = bigquery.Client(project=project_id)
 
     request_json = request.get_json(silent=True)
-    target_date = request_json["target_date"]
+    # target_date = datetime.now(pytz.timezone('Asia/Seoul'))
+    # target_date = target_date.strftime('%Y-%m-%d')
+    target_date = '2024-07-10'
     print(f"target_date: {target_date}")
 
     extracted_df = extract_github_raw_data(client, target_date)
@@ -88,3 +92,5 @@ def HelloHTTP(request):
     webhook_url = 'https://hooks.slack.com/services/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'
     message = ':large_blue_circle: repo_marketing ETL job is done'
     send_slack_notification(webhook_url, message)
+
+    return {"status_code": 200}
