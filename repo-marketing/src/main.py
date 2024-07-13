@@ -1,9 +1,9 @@
 import functions_framework
 import pandas_gbq as gbq
-from google.oauth2 import service_account
 from google.cloud import bigquery
 from query_strings import func_delete_records_from_bigquery, func_fetch_repo_events
-
+import requests
+import json
 
 def _load_df_from_bigquery(client, query):
     query_job = client.query(query)
@@ -39,9 +39,23 @@ def load_dataframe_to_bigquery(target_date, df, project_id, dataset_id, table_id
     )
     print(f"{target_date} Data loaded to `{project_id}.{dataset_id}.{table_id}`")
 
+def send_slack_notification(webhook_url, message):
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    payload = {
+        'text': message,
+    }
+    response = requests.post(webhook_url, headers=headers, data=json.dumps(payload))
+
+    if response.status_code == 200:
+        print('Message sent successfully.')
+    else:
+        print(f'Failed to send message. Status code: {response.status_code}, Response: {response.text}')
+
 
 @functions_framework.http
-def etl_repo_marketing(request):
+def HelloHTTP(request):
     """HTTP Cloud Function.
     Args:
         request (flask.Request): The request object.
@@ -51,12 +65,6 @@ def etl_repo_marketing(request):
         Response object using `make_response`
         <https://flask.palletsprojects.com/en/1.1.x/api/#flask.make_response>.
     """
-
-    # 로컬에서 살리기
-    # SERVICE_ACCOUNT_FILE = "../configs/bigquery_key.json"  # 키 json 파일
-    # credentials = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE
-    # )
 
     project_id = "data-427901"
     client = bigquery.Client(project=project_id)
@@ -76,3 +84,7 @@ def etl_repo_marketing(request):
         "repo_marketing",
         "fact_repo_events",
     )
+
+    webhook_url = 'https://hooks.slack.com/services/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'
+    message = ':large_blue_circle: repo_marketing ETL job is done'
+    send_slack_notification(webhook_url, message)
